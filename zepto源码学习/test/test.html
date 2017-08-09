@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<p>111</p>
+	<h1>111</h1>
+</body>
+</html>
+<script>
+	var $ = function(selector){
+	  return { dom: Array.prototype.slice.apply(document.querySelectorAll(selector)), 
+	    anim: $.anim, css: $.css, html: $.html };
+	}
+
+
+	$.html = function(html){
+	  this.dom.forEach(function(el){ el.innerHTML = html }); return this;
+	}
+
+	$.css = function(style){
+	  this.dom.forEach(function(el){ el.style.cssText += ';'+style }); return this;
+	}
+</script>
+<script type="text/javascript">
+	console.log($('p'))
+	$('p,h1').html("22").css('color:#ccc')
+</script>
