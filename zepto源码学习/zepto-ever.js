@@ -119,32 +119,89 @@ $('some css selector').html('set contents').css('set styles');*/
 /******************************************zepto-3********************************************************************/
 
 /******************************************zepto-4********************************************************************/
-(function(slice){
-	var $ = function(_){
-	  if(typeof _ == 'function') $.dom.forEach(_)
-	    else { 
-	      $._   = _;
-	      $.dom = slice.call(document.querySelectorAll(_));
-	    }
-	  return $.fn;
+// var $ = (function(){
+// 	var slice = [].slice,k,
+// 		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
+// function $(_){
+//   if(typeof _ == 'function') $.dom.forEach(_)
+//     else { 
+//       $._   = _;
+//       $.dom = slice.call(document.querySelectorAll(_));
+//     }
+//   return $.fn;
+// }
+
+// 	$.fn = {
+// 	  get: function(idx){ return idx === undefined ? $.dom : $.dom[idx] },
+// 	  html: function(html){
+// 	    return $(function(el){ el.innerHTML = html });
+// 	  },
+// 	  css: function(style){
+// 	    return $(function(el){ el.style.cssText += ';'+style });
+// 	  },
+// 	  anim: function(transform, opacity, dur){
+// 	    return $.fn.css('-webkit-transition:all '+(dur||0.5)+'s;'+
+// 	      '-webkit-transform:'+transform+';opacity:'+(opacity===0?0:opacity||1));
+// 	  },
+// 	  live: function(event, callback){
+// 	    var selector = $._;
+// 	    document.body.addEventListener(event, function(event){
+// 	      var target = event.target, nodes = slice.call(document.querySelectorAll(selector));
+// 	      while(target && nodes.indexOf(target)<0) target = target.parentNode;
+// 	      if(target && !(target===document)) callback.call(target, event);
+// 	    }, false);
+// 	    return $.fn;
+// 	  }
+// 	};
+
+
+//   function ajax(method, url, success){
+//     var r = new XMLHttpRequest();
+//     r.onreadystatechange = function(){
+//       if(r.readyState==4 && r.status==200) 
+//         success(r.responseText);
+//     };
+//     r.open(method,url,true);
+//     r.send(null);
+//   }
+  
+//   $.get = function(url, success){ ajax('GET', url, success); };
+//   $.post = function(url, success){ ajax('POST', url, success); };
+//   $.getJSON = function(url, success){ 
+//     $.get(url, function(json){ success(JSON.parse(json)) });
+//   };
+//   return $
+// })();
+/******************************************zepto-4********************************************************************/
+/******************************************zepto-5********************************************************************/
+
+
+var $ = (function(){
+	var slice = [].slice,k,
+		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
+	
+	
+	function $(_){
+		function fn(_){
+			return arguments.callee.dom.forEach(_),arguments.callee;
+		}
+		fn.dom = slice.call(document.querySelectorAll(fn.selector=_));
+		for(k in $.fn) {
+			fn[k] = $.fn[k]
+		}
+		return fn
 	}
 
 	$.fn = {
 	  get: function(idx){ return idx === undefined ? $.dom : $.dom[idx] },
 	  html: function(html){
-	    return $(function(el){ el.innerHTML = html });
-	  },
-	  append: function(html){
-	    return $(function(el){ el.insertAdjacentHTML('beforeEnd',html) });
-	  },
-	  prepend: function(html){
-	    return $(function(el){ el.insertAdjacentHTML('afterBegin',html) });
+	    return this(function(el){ el.innerHTML = html });
 	  },
 	  css: function(style){
-	    return $(function(el){ el.style.cssText += ';'+style });
+	    return this(function(el){ el.style.cssText += ';'+style });
 	  },
 	  anim: function(transform, opacity, dur){
-	    return $.fn.css('-webkit-transition:all '+(dur||0.5)+'s;'+
+	    return this.css('-webkit-transition:all '+(dur||0.5)+'s;'+
 	      '-webkit-transform:'+transform+';opacity:'+(opacity===0?0:opacity||1));
 	  },
 	  live: function(event, callback){
@@ -154,15 +211,19 @@ $('some css selector').html('set contents').css('set styles');*/
 	      while(target && nodes.indexOf(target)<0) target = target.parentNode;
 	      if(target && !(target===document)) callback.call(target, event);
 	    }, false);
-	    return $.fn;
+	    return this;
 	  }
 	};
 
+	for(k in ADJ_OPS)
+    $.fn[k] = (function(op){ 
+      return function(html){ return $(function(el){ el.insertAdjacentHTML(op,html) }) };
+    })(ADJ_OPS[k]);
 
   function ajax(method, url, success){
     var r = new XMLHttpRequest();
     r.onreadystatechange = function(){
-      if(r.readyState==4 && r.status==200) 
+      if(r.readyState==4 && (r.status==200 || r.status==0))
         success(r.responseText);
     };
     r.open(method,url,true);
@@ -174,6 +235,7 @@ $('some css selector').html('set contents').css('set styles');*/
   $.getJSON = function(url, success){ 
     $.get(url, function(json){ success(JSON.parse(json)) });
   };
-  this.$ = $;
-})([].slice);
-/******************************************zepto-4********************************************************************/
+  return $
+})();
+
+/******************************************zepto-5********************************************************************/
