@@ -175,7 +175,6 @@ $('some css selector').html('set contents').css('set styles');*/
 /******************************************zepto-4********************************************************************/
 /******************************************zepto-5********************************************************************/
 
-
 var $ = (function(){
 	var slice = [].slice,k,
 		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
@@ -185,7 +184,8 @@ var $ = (function(){
 		function fn(_){
 			return arguments.callee.dom.forEach(_),arguments.callee;
 		}
-		fn.dom = slice.call(document.querySelectorAll(fn.selector=_));
+		// fn.dom = slice.call(document.querySelectorAll(fn.selector=_));
+		fm.dom = _ instanceof Element?[_]:slice.call(document.querySelectorAll(fn.selector=_))
 		for(k in $.fn) {
 			fn[k] = $.fn[k]
 		}
@@ -193,9 +193,16 @@ var $ = (function(){
 	}
 
 	$.fn = {
-	  get: function(idx){ return idx === undefined ? $.dom : $.dom[idx] },
+	  get: function(idx){ 
+	  	return idx === undefined ? $.dom : $.dom[idx] 
+	  },
 	  html: function(html){
+	    console.log(this)
 	    return this(function(el){ el.innerHTML = html });
+	  },
+	  attr:function(name,value){
+	  		if(value==undefined) return this.dom[0].getAttribute(name) || undefined;
+	  		return this(function(el){el.setAttribute(name,value)});
 	  },
 	  css: function(style){
 	    return this(function(el){ el.style.cssText += ';'+style });
@@ -217,7 +224,7 @@ var $ = (function(){
 
 	for(k in ADJ_OPS)
     $.fn[k] = (function(op){ 
-      return function(html){ return $(function(el){ el.insertAdjacentHTML(op,html) }) };
+      return function(html){ return this(function(el){ el.insertAdjacentHTML(op,html) }) };
     })(ADJ_OPS[k]);
 
   function ajax(method, url, success){
