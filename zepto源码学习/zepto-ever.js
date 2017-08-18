@@ -185,7 +185,7 @@ var $ = (function(){
 			return arguments.callee.dom.forEach(_),arguments.callee;
 		}
 		// fn.dom = slice.call(document.querySelectorAll(fn.selector=_));
-		fm.dom = _ instanceof Element?[_]:slice.call(document.querySelectorAll(fn.selector=_))
+		fn.dom = _ instanceof Element?[_]:slice.call(document.querySelectorAll(fn.selector=_))
 		for(k in $.fn) {
 			fn[k] = $.fn[k]
 		}
@@ -197,7 +197,7 @@ var $ = (function(){
 	  	return idx === undefined ? $.dom : $.dom[idx] 
 	  },
 	  html: function(html){
-	    console.log(this)
+	  	if(html===undefined) return this.dom[0].innerHTML || undefined;
 	    return this(function(el){ el.innerHTML = html });
 	  },
 	  attr:function(name,value){
@@ -211,15 +211,24 @@ var $ = (function(){
 	    return this.css('-webkit-transition:all '+(dur||0.5)+'s;'+
 	      '-webkit-transform:'+transform+';opacity:'+(opacity===0?0:opacity||1));
 	  },
-	  live: function(event, callback){
-	    var selector = $._;
-	    document.body.addEventListener(event, function(event){
-	      var target = event.target, nodes = slice.call(document.querySelectorAll(selector));
-	      while(target && nodes.indexOf(target)<0) target = target.parentNode;
-	      if(target && !(target===document)) callback.call(target, event);
-	    }, false);
-	    return this;
-	  }
+	  // live: function(event, callback){
+	  //   var selector = this.selector;
+	  //   document.body.addEventListener(event, function(event){
+	  //     var target = event.target, nodes = slice.call(document.querySelectorAll(selector));
+	  //     while(target && nodes.indexOf(target)<0) target = target.parentNode;
+	  //     if(target && !(target===document)) callback.call(target, event);
+	  //   }, false);
+	  //   return this;
+	  // },
+	  delegate:function(selector,event,callback){
+	  	return this(function(el){
+	  		el.addEventListener(event,function(event){
+	  			var target = event.target,node = slice.call(el.querySelectorAll(selector));
+	  			while(target && nodes.indexOf(target)<0) target = target.parentNode;
+	  			if(target && !(target===el)) callback.call(target,event);
+	  		},false)
+	  	})
+	  },
 	};
 
 	for(k in ADJ_OPS)
@@ -244,5 +253,4 @@ var $ = (function(){
   };
   return $
 })();
-
 /******************************************zepto-5********************************************************************/
