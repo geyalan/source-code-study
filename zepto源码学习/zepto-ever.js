@@ -276,11 +276,12 @@ var $ = (function(d){
 		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
 	
 	
-	function $(_){
+	function $(_,context){
+		if(context !== void 0) return $(context).find(_);
 		function fn(_){
 			return fn.dom.forEach(_),fn;
 		}
-		fm.dom = _ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d.querySelectorAll(fn.selector=_)));
+		fm.dom = (typeof _ =='function'&& 'dom' in _)?_.dom:(_ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d.querySelectorAll(fn.selector=_))));
 		for(k in $.fn) {
 			fn[k] = $.fn[k]
 		}
@@ -313,11 +314,15 @@ var $ = (function(d){
 	          else el.setAttribute(name,value);
 	        });
       },
+      offset:function(){
+      	var obj = this.dm[0].getBoundingClientRect();
+      	return {left:obj.left+document.body.scrollLeft,top:obj.top+document.body.scrollTop,width:obj.width;height:obj,height};
+      },
 	  css: function(style){
 	    return this(function(el){ el.style.cssText += ';'+style }); 
 	  },
 	  index:function(target){
-	  	return [].inexOf.call(this.dom,$(target).get(0))
+	  	return this.dom.indexOf($(target).get(0));
 	  },
 	  anim: function(transform, opacity, dur){
 	    return this.css('-webkit-transition:all '+(dur||0.5)+'s;'+
@@ -346,7 +351,7 @@ var $ = (function(d){
 	  	return this(function(el){
 	  		el.className = el.className.replace(classRE(name),' ').replace(/^\s+|\s+$/,'');
 	  	})
-	  },
+	  }
 	};
 
 	for(k in ADJ_OPS)
@@ -372,6 +377,7 @@ var $ = (function(d){
     $.get(url, function(json){ success(JSON.parse(json)) });
   };
   return $
+
 })(document);
 
 /******************************************zepto-5********************************************************************/
