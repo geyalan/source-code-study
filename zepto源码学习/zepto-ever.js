@@ -273,7 +273,7 @@ $('some css selector').html('set contents').css('set styles');*/
 
 var $ = (function(d){
 	var slice = [].slice,k,
-		CN = 'className',AEL = 'addEventListener',PN = 'parentNode',
+		CN = 'className',AEL = 'addEventListener',PN = 'parentNode',QSA = querySelectorAll,
 		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
 	
 	
@@ -282,7 +282,7 @@ var $ = (function(d){
 		function fn(_){
 			return fn.dom.forEach(_),fn;
 		}
-		fn.dom = (typeof _ =='function'&& 'dom' in _)?_.dom:(_ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d.querySelectorAll(fn.selector=_))));
+		fn.dom = (typeof _ =='function'&& 'dom' in _)?_.dom:(_ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d[SQA](fn.selector=_))));
 		for(k in $.fn) {
 			fn[k] = $.fn[k]
 		}
@@ -290,7 +290,7 @@ var $ = (function(d){
 	}
 
 	function classRE(name) {return new RegExp("(^|\\s)"+name+"(\\s|$)")}
-	function elSelect(el,selector){return slice.call(el.querySelectorAll(selector))}
+	function elSelect(el,selector){return slice.call(el[SQA](selector))}
 
 	$.fn = {
 	  get: function(idx){ 
@@ -310,6 +310,10 @@ var $ = (function(d){
 	  	 while(el && nodes.indexOf(el)<0) el=el.PN;
 	  	 return $(el && !(el===d)?el:[]);
 	  },
+	  show:function(){return this.css('display:block')},
+	  hide:function(){return this.css('display:none')},
+	  prev:function(){return $(this.dom.map(function(el){return el.previousElementSibling}))},
+	  next:function(){return $(this.dom.map(function(el){return el.nextElementSibling}))},
 	  html: function(html){
 	  	return html === void 0 ?(this.dom.length>0?this.dom[0].innerHTML:null) : this(function(el){el.innerHTML = html})
 	  },
