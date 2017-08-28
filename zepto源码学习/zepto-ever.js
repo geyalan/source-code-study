@@ -273,6 +273,7 @@ $('some css selector').html('set contents').css('set styles');*/
 
 var $ = (function(d){
 	var slice = [].slice,k,
+		CN = 'className',AEL = 'addEventListener',PN = 'parentNode',
 		ADJ_OPS = {append:'beforeEnd',prepend:'afterBegin',before:'beforeBegin',after:'afterEnd'};
 	
 	
@@ -281,7 +282,7 @@ var $ = (function(d){
 		function fn(_){
 			return fn.dom.forEach(_),fn;
 		}
-		fm.dom = (typeof _ =='function'&& 'dom' in _)?_.dom:(_ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d.querySelectorAll(fn.selector=_))));
+		fn.dom = (typeof _ =='function'&& 'dom' in _)?_.dom:(_ instanceof Array?_:(_ instanceof Element?[_]:slice.call(d.querySelectorAll(fn.selector=_))));
 		for(k in $.fn) {
 			fn[k] = $.fn[k]
 		}
@@ -296,13 +297,18 @@ var $ = (function(d){
 	  	return idx === void 0 ? $.dom : $.dom[idx] 
 	  },
 	  remove:function(){
-	  	return this(function(el){el.parentNode.removeChild(el)})
+	  	return this(function(el){el.PN.removeChild(el)})
 	  },
 	  each:function(callback){
 	  	return this(function(e){callback(e)})
 	  },
 	  find:function(selector){
 	  	return $(this.dom.map(function(el){return elSelect(el,selector)}).reduce(function(a,b){return a.concat(b)},[]))
+	  },
+	  closest:function(selector){
+	  	 var el=this.dom[0].PN,nodes = elSelect(d,selector);
+	  	 while(el && nodes.indexOf(el)<0) el=el.PN;
+	  	 return $(el && !(el===d)?el:[]);
 	  },
 	  html: function(html){
 	  	return html === void 0 ?(this.dom.length>0?this.dom[0].innerHTML:null) : this(function(el){el.innerHTML = html})
@@ -315,8 +321,8 @@ var $ = (function(d){
 	        });
       },
       offset:function(){
-      	var obj = this.dm[0].getBoundingClientRect();
-      	return {left:obj.left+document.body.scrollLeft,top:obj.top+document.body.scrollTop,width:obj.width;height:obj,height};
+      	var obj = this.dom[0].getBoundingClientRect();
+      	return { left: obj.left+d.body.scrollLeft, top: obj.top+d.body.scrollTop, width: obj.width, height: obj.height };
       },
 	  css: function(style){
 	    return this(function(el){ el.style.cssText += ';'+style }); 
@@ -330,12 +336,12 @@ var $ = (function(d){
 	  },
 	  bind:function(event,callback){
 	  	return this(function(el){
-	  		event.splite(/\s/).forEach(function(event){el.addEventListener(event,callback,false)});
+	  		event.splite(/\s/).forEach(function(event){el[AEL](event,callback,false)});
 	  	})
 	  },
 	  delegate:function(selector,event,callback){
 	  	return this(function(el){
-	  		el.addEventListener(event,function(event){
+	  		el[AEL](event,function(event){
 	  			var target = event.target,node = elSelect(el,selector);
 	  			while(target && nodes.indexOf(target)<0) target = target.parentNode;
 	  			if(target && !(target===el)) callback.call(target,event);
@@ -344,12 +350,12 @@ var $ = (function(d){
 	  },
 	  addClass:function(name){
 	  	return this(function(el){
-	  		!classRE(name).test(el.className) && (el.className += (el.className?' ':'')+name);
+	  		!classRE(name).test(el[CN]) && (el[CN] += (el[CN]?' ':'')+name);
 	  	})
 	  },
 	  removeClass:function(name){
 	  	return this(function(el){
-	  		el.className = el.className.replace(classRE(name),' ').replace(/^\s+|\s+$/,'');
+	  		el[CN] = el[CN].replace(classRE(name),' ').replace(/^\s+|\s+$/,'');
 	  	})
 	  }
 	};
@@ -376,7 +382,7 @@ var $ = (function(d){
   $.getJSON = function(url, success){ 
     $.get(url, function(json){ success(JSON.parse(json)) });
   };
-  return $
+  return $;
 
 })(document);
 
