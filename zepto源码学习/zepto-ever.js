@@ -360,13 +360,47 @@ var $ = (function(d){
 	  }
 	};
 
-	['width','height'].forEach(function(m){$.fn[m] = function(){return this.offset()[m]}});
+	['width','height'].forEach(function(m){$.fn[m] = function(){return this.offset()[m]}});  
 	for(k in ADJ_OPS)
     $.fn[k] = (function(op){ 
       return function(html){ return this(function(el){ 
       	el['insertAdjacent' + (html instanceof Element ? 'Element' : 'HTML')](op,html)
       }) };
     })(ADJ_OPS[k]);
+
+    ['swipeLeft', 'swipeRight', 'doubleTap', 'tap'].forEach(function(m){
+    	$.fn[m] = function(callback){ return this.bind(m, callback) }
+  	});
+
+	  function dispatch(event, target) {
+	    var e = document.createEvent('Events');
+	    e.initEvent(event, true, false);
+	    target.dispatchEvent(e);
+	  }
+
+	  d.ontouchstart = function(e) {
+	    var now = Date.now(), t = e.touches[0].target, delta = now - (t.last || now);
+	    t.x1 = e.touches[0].pageX;
+	    if (delta > 0 && delta <= 800) {
+	      dispatch('doubleTap', t);
+	      t.last = 0;
+	    } else t.last = now;
+	  }
+
+	  d.ontouchmove = function(e) {
+	    e.touches[0].target.x2 = e.touches[0].pageX;
+	  }
+
+	  d.ontouchend = function(e) {
+	    var t = e.target;
+	    if (t.x2 > 0) {
+	      t.x1 - t.x2 > 30 && dispatch('swipeLeft', t);
+	      t.x1 - t.x2 < -30 && dispatch('swipeRight', t);
+	      t.x1 = t.x2 = t.last = 0;
+	    } else if (t.last != 0) {
+	      dispatch('tap', t);
+	    }
+	  }
 
   function ajax(method, url, success){
     var r = new XMLHttpRequest();
@@ -375,6 +409,7 @@ var $ = (function(d){
         success(r.responseText);
     };
     r.open(method,url,true);
+    r.setRequestHeader('X-Requested-Width','XMLHttpRequest');
     r.send(null);
   }
   
